@@ -52,17 +52,10 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 }
 
 func (h *userHandler) Login(c *gin.Context) {
-	//  user memasukan input (email dan password)
-	//  input ditangkap handler
-	//  mapping dari input user ke input struct
-	//  input struct passing service
-	//  di service mencari dengan bantuan repository user dengan email x
-	//  mencocokan password
 
 	var input user.LoginInput
 
 	err := c.ShouldBindJSON(&input)
-
 	if err != nil {
 		errors := helper.FormatValidationError(err)
 
@@ -88,5 +81,44 @@ func (h *userHandler) Login(c *gin.Context) {
 	response := helper.APIResponse("Successfully logged in", http.StatusOK, "success", formatter)
 
 	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
+
+	var input user.CheckEmailInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal mengecek Email", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	IsEmailAvailable, err := h.userService.IsEmailAvailable(input)
+	if err != nil {
+
+		errorMessage := gin.H{"errors": "server terkendala"}
+		response := helper.APIResponse("login gagal", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_available": IsEmailAvailable,
+	}
+
+	metaMessage := "email sudah terdaftar"
+
+	if IsEmailAvailable {
+		metaMessage = "Email bisa di daftarkan"
+	}
+
+	response := helper.APIResponse(metaMessage, http.StatusOK, "success", data)
+	c.JSON(http.StatusUnprocessableEntity, response)
 
 }
