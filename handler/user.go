@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"fundraising/auth"
 	"fundraising/helper"
 	"fundraising/user"
 	"net/http"
@@ -11,16 +12,15 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
-	/* tangkap input dari user
-	   map input dari user ke struct RegisterUserInput
-	   struct diatas kita passing sebagai parameter service */
+
 	var input user.RegisterUserInput
 
 	err := c.ShouldBindJSON(&input)
@@ -43,9 +43,14 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	// token, err := h.jwtService.GenerateToken()
+	token, err := h.authService.GenerateToken(newUser.ID)
+	if err != nil {
+		response := helper.APIResponse("registrasi akun gagal", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
 
-	formatter := user.FormatUser(newUser, "tokentokentokentokentokentokentokentokentokentokentoken")
+	formatter := user.FormatUser(newUser, token)
 
 	response := helper.APIResponse("Akun berhasil didaftarkan", http.StatusOK, "succes", formatter)
 
@@ -77,7 +82,14 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := user.FormatUser(loggedinUser, "tokentokenakehbdajbwdbebdfadjbdcandadcnkwjnjfbhr")
+	token, err := h.authService.GenerateToken(loggedinUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Login gagal", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := user.FormatUser(loggedinUser, token)
 
 	response := helper.APIResponse("Successfully logged in", http.StatusOK, "success", formatter)
 
@@ -125,13 +137,6 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 }
 
 func (h *userHandler) UploadAvatar(c *gin.Context) {
-
-	//input dari user
-	//simpan gambar di folder images
-	//panggil service di repo
-	//JWT (sementara hardcode, seakan akan user yg login ID =1)
-	//repo ambil data user yg ID =1
-	//repo update data user simpan lokasi file
 
 	file, err := c.FormFile("avatar")
 	if err != nil {
