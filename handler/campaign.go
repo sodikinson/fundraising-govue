@@ -9,12 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// tangkap parameter di handler
-// handler ke service
-// service yg menentukan repository
-// repository : FindAll, FindByUserID
-// db
-
 type campaignHandler struct {
 	service campaign.Service
 }
@@ -35,6 +29,6 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("campaign list", http.StatusOK, "success", campaigns)
+	response := helper.APIResponse("campaign list", http.StatusOK, "success", campaign.FormatCampaigns(campaigns))
 	c.JSON(http.StatusOK, response)
 }
