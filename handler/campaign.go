@@ -130,6 +130,8 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 
 func (h *campaignHandler) UploadImage(c *gin.Context) {
 
+	// TODO: FIX IsPrimary, can't upload images
+
 	var input campaign.CreateCampaignImageInput
 
 	err := c.ShouldBind(&input)
@@ -139,7 +141,7 @@ func (h *campaignHandler) UploadImage(c *gin.Context) {
 
 		errorMessage := gin.H{"errors": errors}
 
-		response := helper.APIResponse("failed to update campaign", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.APIResponse("failed to upload campaign image", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 
