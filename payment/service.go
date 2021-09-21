@@ -19,6 +19,7 @@ func NewService() *service {
 	return &service{}
 }
 
+// TODO : isi server key dan client key dari midtrans dashboard
 func (s *service) GetPaymentURL(transaction Transaction, user user.User) (string, error) {
 	midclient := midtrans.NewClient()
 	midclient.ServerKey = ""
